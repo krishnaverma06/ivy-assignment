@@ -32,7 +32,7 @@ const RentalDetail = () => {
       <button onClick={() => navigate(-1)} className="btn btn-secondary" style={{ marginBottom: '2rem' }}>&larr; Back</button>
       
       <div className="card">
-        <div className="flex justify-between items-start" style={{ marginBottom: '1.5rem' }}>
+        <div className="flex justify-between items-start md:flex-col md:gap-4" style={{ marginBottom: '1.5rem' }}>
           <div>
             <span className="badge badge-green" style={{ marginBottom: '0.5rem' }}>{rental.property_type || 'Rental Property'}</span>
             <h1 style={{ fontSize: '2rem', margin: '0.5rem 0' }}>{rental.title || rental.apartment_name || 'Unknown Building'}</h1>
@@ -43,13 +43,13 @@ const RentalDetail = () => {
               </a>
             )}
           </div>
-          <div style={{ textAlign: 'right' }}>
+          <div style={{ textAlign: 'right' }} className="md:items-start md:text-left">
             <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--primary)' }}>₹{Number(rental.price)?.toLocaleString()} <span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 400 }}>/ mo</span></div>
             <div style={{ color: 'var(--text-muted)' }}>{rental.bedroom} BHK • {rental.carpet_area} sqft</div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2" style={{ gap: '2rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
+        <div className="grid grid-cols-2 md:grid-cols-1" style={{ gap: '2rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
           <div>
             <h3 style={{ marginBottom: '1rem' }}>Rental Information</h3>
             <div className="flex-col gap-2">

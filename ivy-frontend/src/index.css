@@ -18,6 +18,17 @@
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.dark {
+  --primary: #6366F1;
+  --primary-hover: #818CF8;
+  --secondary: #34D399;
+  --background: #111827;
+  --surface: #1F2937;
+  --text-main: #F9FAFB;
+  --text-muted: #9CA3AF;
+  --border: #374151;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -204,3 +215,15 @@ button {
 .badge-green { background-color: #D1FAE5; color: #065F46; }
 .badge-blue { background-color: #DBEAFE; color: #1E40AF; }
 .badge-gray { background-color: #F3F4F6; color: #374151; }
+
+.dark .badge-green { background-color: rgba(52, 211, 153, 0.2); color: #34D399; }
+.dark .badge-blue { background-color: rgba(99, 102, 241, 0.2); color: #818CF8; }
+.dark .badge-gray { background-color: #374151; color: #D1D5DB; }
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  .md\:flex-col { flex-direction: column !important; }
+  .md\:items-start { align-items: flex-start !important; }
+  .navbar .container { flex-direction: column; gap: 1rem; }
+  .md\:hidden { display: none !important; }
+}

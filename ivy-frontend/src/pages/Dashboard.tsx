@@ -89,10 +89,33 @@ const Dashboard = () => {
         </div>
       ) : (
         <>
-          <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <TrendingUp size={24} color="var(--primary)" /> Market Overview
-          </h2>
-          <div className="grid grid-cols-4" style={{ marginBottom: '3rem' }}>
+          {/* Alert Cards */}
+          <div className="grid grid-cols-4 md:grid-cols-1" style={{ gap: '1rem', marginBottom: '2rem' }}>
+            <div className="card" style={{ backgroundColor: '#FEE2E2', borderColor: '#FCA5A5', padding: '1.25rem' }}>
+              <div className="flex items-center gap-2" style={{ color: '#991B1B', marginBottom: '0.5rem', fontWeight: 600 }}><ShieldAlert size={20} /> Fake Agents Found</div>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#7F1D1D' }}>12</div>
+              <div style={{ fontSize: '0.875rem', color: '#991B1B', marginTop: '0.25rem' }}>Operating under aliases</div>
+            </div>
+            <div className="card" style={{ backgroundColor: '#FEF3C7', borderColor: '#FCD34D', padding: '1.25rem' }}>
+              <div className="flex items-center gap-2" style={{ color: '#92400E', marginBottom: '0.5rem', fontWeight: 600 }}><AlertTriangle size={20} /> Fake Listings</div>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#78350F' }}>215</div>
+              <div style={{ fontSize: '0.875rem', color: '#92400E', marginTop: '0.25rem' }}>Posted by fake agents</div>
+            </div>
+            <div className="card" style={{ backgroundColor: '#E0E7FF', borderColor: '#A5B4FC', padding: '1.25rem' }}>
+              <div className="flex items-center gap-2" style={{ color: '#3730A3', marginBottom: '0.5rem', fontWeight: 600 }}><FileX size={20} /> Corrupt Records</div>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#312E81' }}>18</div>
+              <div style={{ fontSize: '0.875rem', color: '#3730A3', marginTop: '0.25rem' }}>Logically impossible data</div>
+            </div>
+            <div className="card" style={{ backgroundColor: '#F3F4F6', borderColor: '#D1D5DB', padding: '1.25rem' }}>
+              <div className="flex items-center gap-2" style={{ color: '#374151', marginBottom: '0.5rem', fontWeight: 600 }}><TrendingUp size={20} /> Project Mismatches</div>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#1F2937' }}>298</div>
+              <div style={{ fontSize: '0.875rem', color: '#374151', marginTop: '0.25rem' }}>Wrong listing counts</div>
+            </div>
+          </div>
+
+          {/* Real Summary Data */}
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>True Market Insights <span style={{ fontSize: '0.875rem', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>(Computed Client-Side from 200 samples)</span></h3>
+          <div className="grid grid-cols-4 md:grid-cols-1" style={{ marginBottom: '3rem' }}>
             <div className="card" style={{ borderTop: '4px solid var(--primary)' }}>
               <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Total Listings</span>
               <div style={{ fontSize: '2.5rem', fontWeight: 700, margin: '0.5rem 0', color: 'var(--text-main)' }}>{stats?.totalListings?.toLocaleString() || 0}</div>

@@ -32,7 +32,7 @@ const ListingDetail = () => {
       <button onClick={() => navigate(-1)} className="btn btn-secondary" style={{ marginBottom: '2rem' }}>&larr; Back</button>
       
       <div className="card">
-        <div className="flex justify-between items-start" style={{ marginBottom: '1.5rem' }}>
+        <div className="flex justify-between items-start md:flex-col md:gap-4" style={{ marginBottom: '1.5rem' }}>
           <div>
             <span className="badge badge-blue" style={{ marginBottom: '0.5rem' }}>{listing.property_type || 'Property'}</span>
             <h1 style={{ fontSize: '2rem', margin: '0.5rem 0' }}>{listing.apartment_name || 'Unknown Building'}</h1>
@@ -43,13 +43,13 @@ const ListingDetail = () => {
               </a>
             )}
           </div>
-          <div style={{ textAlign: 'right' }}>
+          <div style={{ textAlign: 'right' }} className="md:items-start md:text-left">
             <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--primary)' }}>₹{Number(listing.price)?.toLocaleString()}</div>
             <div style={{ color: 'var(--text-muted)' }}>{listing.bedroom} BHK • {listing.carpet_area} sqft</div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2" style={{ gap: '2rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
+        <div className="grid grid-cols-2 md:grid-cols-1" style={{ gap: '2rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
           <div>
             <h3 style={{ marginBottom: '1rem' }}>Property Details</h3>
             <div className="flex-col gap-2">
