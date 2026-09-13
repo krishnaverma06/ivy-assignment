@@ -109,10 +109,6 @@ Hypotheses that did not pan out are just as informative as those that did:
    - *Hypothesis*: I suspected fake agents posting duplicate listings might reuse the same `listing_url` across different websites.
    - *Result*: Every listing URL pointed to distinct real-world portal formats (`100acres.com`, `dwelling.com`, `squarelane.com`, etc.). Fake listings were instead detectable via phone numbers posting under multiple conflicting agent and agency identities.
 
-5. **Alternative Query Parameter Names for Filters**:
-   - *Hypothesis*: Because the API ignored the documented `min_price`, `max_price`, and `furnishing` filters on `/v1/listings`, I hypothesized the documentation simply used the wrong parameter names (e.g., `price_min` instead of `min_price`, or `furnished` instead of `furnishing`), just as it used `page` instead of `offset`.
-   - *Result*: I wrote a script to exhaustively test 24 naming variations for price (including bounds in Crores/Lakhs) and 21 variations for furnishing. None of them had any effect. The backend simply does not support these filters on the listings endpoint. I did, however, prove that `property_type` requires a literal space (`independent house`) rather than the documented underscore (`independent_house`).
-
 ---
 
 ## What I Would Do With Another Two Days

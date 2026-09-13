@@ -72,56 +72,67 @@ const Favorites = () => {
           {listings.map(listing => {
             const carpetInfo = formatCarpetArea(listing.carpet_area, listing.listing_id);
             return (
-              <div 
-                key={listing.listing_id} 
+              <div
+                key={listing.listing_id}
                 className="card card-hover flex-col"
-                style={{ cursor: 'pointer', padding: 0, overflow: 'hidden' }}
+                style={{
+                  cursor: 'pointer',
+                  padding: '1.5rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  borderColor: 'var(--border)'
+                }}
                 onClick={() => navigate(`/listings/${listing.listing_id}`)}
               >
-                {/* Header visual */}
-                <div className="card-image-bg" style={{ 
-                    height: '140px', 
-                    background: 'linear-gradient(135deg, #4F46E5 0%, #312E81 100%)',
-                    padding: '1rem'
-                  }}>
-                  <div className="flex justify-between items-start">
-                    <span className="badge" style={{ backgroundColor: 'rgba(255,255,255,0.9)', color: '#111827' }}>
+                <div className="flex justify-between items-start">
+                  <div className="flex gap-2 flex-wrap">
+                    <span className="badge" style={{ backgroundColor: 'var(--background)', color: 'var(--text-main)', border: '1px solid var(--border)' }}>
                       {listing.property_type || 'Apartment'}
                     </span>
-                    <button 
-                      onClick={(e) => removeFavorite(e, listing.listing_id)} 
-                      className="favorite-btn"
-                      style={{ background: 'rgba(255,255,255,0.9)', padding: '0.5rem', borderRadius: '50%' }}
-                    >
-                      <Heart size={18} fill="#EF4444" color="#EF4444" />
-                    </button>
+                    <span className="badge" style={{ backgroundColor: 'var(--background)', color: 'var(--text-main)', border: '1px solid var(--border)' }}>
+                      {listing.furnishing_status || 'Unfurnished'}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={(e) => removeFavorite(e, listing.listing_id)} 
+                    className="favorite-btn"
+                    style={{ background: '#FEE2E2', padding: '0.5rem', borderRadius: '50%', color: '#EF4444', border: '1px solid #FCA5A5' }}
+                  >
+                    <Heart size={16} fill="#EF4444" />
+                  </button>
+                </div>
+
+                <div>
+                  <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', lineHeight: 1.3 }}>
+                    {listing.apartment_name || 'Unknown Building'}
+                  </h3>
+                  <p className="flex items-center gap-1" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: 0 }}>
+                    <MapPin size={14} /> {listing.locality}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2" style={{ gap: '1rem', marginTop: '0.5rem' }}>
+                  <div className="flex flex-col gap-1">
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Bedrooms</span>
+                    <span className="flex items-center gap-1" style={{ fontWeight: 500, color: 'var(--text-main)', fontSize: '0.9rem' }}>
+                      <Bed size={14} /> {listing.bedroom} BHK
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Carpet Area</span>
+                    <span className="flex items-center gap-1" style={{ fontWeight: 500, color: 'var(--text-main)', fontSize: '0.9rem' }}>
+                      <Maximize size={14} /> {carpetInfo.display}
+                    </span>
                   </div>
                 </div>
 
-                {/* Content */}
-                <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-main)', lineHeight: 1.3 }}>
-                    {listing.apartment_name || 'Unknown Building'}
-                  </h3>
-                  <p className="flex items-center gap-1" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1rem' }}>
-                    <MapPin size={14} /> {listing.locality}
-                  </p>
-                  
-                  <div className="flex justify-between items-center" style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-                    <div className="flex flex-col">
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Price</span>
-                      <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '1.125rem' }}>
-                        ₹{Number(listing.price)?.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="flex items-center gap-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        <Bed size={14} /> {listing.bedroom} BHK
-                      </span>
-                      <span className="flex items-center gap-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>
-                        <Maximize size={14} /> {carpetInfo.display}
-                      </span>
-                    </div>
+                <div style={{ marginTop: 'auto', paddingTop: '1.25rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                  <div className="flex flex-col">
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Price</span>
+                    <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '1.5rem', lineHeight: 1 }}>
+                      ₹{Number(listing.price)?.toLocaleString()}
+                    </span>
                   </div>
                 </div>
               </div>

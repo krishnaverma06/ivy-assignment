@@ -84,9 +84,9 @@ const Projects = () => {
       <div className="card flex items-center gap-4 md:flex-col md:items-stretch" style={{ marginBottom: '2rem', padding: '1rem 1.5rem' }}>
         <div className="flex-col gap-2" style={{ flex: 1 }}>
           <label className="form-label" style={{ marginBottom: 0 }}>Locality</label>
-          <select 
-            className="form-input" 
-            value={locality} 
+          <select
+            className="form-input"
+            value={locality}
             onChange={e => { setLocality(e.target.value); setPage(1); }}
           >
             <option value="">All Localities</option>
@@ -98,9 +98,9 @@ const Projects = () => {
 
         <div className="flex-col gap-2" style={{ flex: 1 }}>
           <label className="form-label" style={{ marginBottom: 0 }}>Status</label>
-          <select 
-            className="form-input" 
-            value={status} 
+          <select
+            className="form-input"
+            value={status}
             onChange={e => { setStatus(e.target.value); setPage(1); }}
           >
             <option value="">Any Status</option>
@@ -111,9 +111,9 @@ const Projects = () => {
 
         <div className="flex-col gap-2" style={{ flex: 1 }}>
           <label className="form-label" style={{ marginBottom: 0 }}>Price Range</label>
-          <select 
-            className="form-input" 
-            value={priceRange} 
+          <select
+            className="form-input"
+            value={priceRange}
             onChange={e => { setPriceRange(e.target.value); setPage(1); }}
           >
             <option value="">Any Price</option>
@@ -126,9 +126,9 @@ const Projects = () => {
 
         <div className="flex-col gap-2" style={{ flex: 1 }}>
           <label className="form-label" style={{ marginBottom: 0 }}>Developer</label>
-          <select 
-            className="form-input" 
-            value={developer} 
+          <select
+            className="form-input"
+            value={developer}
             onChange={e => { setDeveloper(e.target.value); setPage(1); }}
           >
             <option value="">All Developers</option>
@@ -147,54 +147,61 @@ const Projects = () => {
         <>
           <div className="grid grid-cols-3 md:grid-cols-1" style={{ marginBottom: '2rem', gap: '1.25rem' }}>
             {paginatedProjects.map(project => (
-              <div 
-                key={project.project_id} 
-                className="card card-hover flex-col" 
-                style={{ cursor: 'pointer', padding: 0, overflow: 'hidden' }}
+              <div
+                key={project.project_id}
+                className="card card-hover flex-col"
+                style={{
+                  cursor: 'pointer',
+                  padding: '1.5rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  borderColor: 'var(--border)'
+                }}
                 onClick={() => navigate(`/projects/${project.project_id}`)}
               >
-                {/* Header visual */}
-                <div className="card-image-bg" style={{ 
-                    height: '140px', 
-                    background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
-                    padding: '1rem'
-                  }}>
-                  <div className="flex justify-between items-start">
-                    <span className="badge" style={{ backgroundColor: 'rgba(255,255,255,0.9)', color: '#111827', textTransform: 'capitalize' }}>
+                <div className="flex justify-between items-start">
+                  <div className="flex gap-2 flex-wrap">
+                    <span className="badge" style={{ backgroundColor: 'var(--background)', color: 'var(--text-main)', border: '1px solid var(--border)', textTransform: 'capitalize' }}>
                       {project.project_status || 'Unknown Status'}
                     </span>
                     {project.total_listings !== undefined && (
-                      <span className="badge flex items-center gap-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', color: '#fff' }}>
+                      <span className="badge flex items-center gap-1" style={{ backgroundColor: '#E0E7FF', color: '#4338CA' }}>
                         <BarChart2 size={12} /> {project.total_listings} Active
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Content */}
-                <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-main)', lineHeight: 1.3 }}>
+                <div>
+                  <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', lineHeight: 1.3 }}>
                     {project.apartment_name}
                   </h3>
-                  <p className="flex items-center gap-1" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                  <p className="flex items-center gap-1" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: 0 }}>
                     <MapPin size={14} /> {project.locality}
                   </p>
-                  <p className="flex items-center gap-1" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1rem' }}>
-                    <Building size={14} /> By {project.developer_name}
-                  </p>
-                  
-                  <div className="flex justify-between items-center" style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-                    <div className="flex flex-col">
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Price Range</span>
-                      <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '1.125rem' }}>
-                        ₹{project.price_min} - {project.price_max} Cr
-                      </span>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="flex items-center gap-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        <Maximize size={14} /> {project.min_area_sqft} - {project.max_area_sqft} sqft
-                      </span>
-                    </div>
+                </div>
+
+                <div className="flex flex-col gap-1" style={{ marginTop: '0.25rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Developer</span>
+                  <span className="flex items-center gap-1" style={{ fontWeight: 500, color: 'var(--text-main)', fontSize: '0.9rem' }}>
+                    <Building size={14} /> {project.developer_name}
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-1" style={{ marginTop: '0.25rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Area Range</span>
+                  <span className="flex items-center gap-1" style={{ fontWeight: 500, color: 'var(--text-main)', fontSize: '0.9rem' }}>
+                    <Maximize size={14} /> {project.min_area_sqft} - {project.max_area_sqft} sqft
+                  </span>
+                </div>
+
+                <div style={{ marginTop: 'auto', paddingTop: '1.25rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                  <div className="flex flex-col">
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Price Range</span>
+                    <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '1.5rem', lineHeight: 1 }}>
+                      ₹{project.price_min} - {project.price_max} Cr
+                    </span>
                   </div>
                 </div>
               </div>
@@ -203,16 +210,16 @@ const Projects = () => {
 
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-4" style={{ paddingBottom: '3rem' }}>
-              <button 
-                className="btn btn-secondary" 
+              <button
+                className="btn btn-secondary"
                 disabled={page === 1}
                 onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               >
                 Previous
               </button>
               <span style={{ fontWeight: 500, fontSize: '0.875rem' }}>Page {page} of {totalPages}</span>
-              <button 
-                className="btn btn-secondary" 
+              <button
+                className="btn btn-secondary"
                 disabled={page === totalPages}
                 onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               >

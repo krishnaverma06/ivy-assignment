@@ -11,7 +11,9 @@ export const AUDIT_METRICS = {
   costliestProjectPrice: 989000000,
   recentListings7Days: 129,
   reportedListingsTotal: 3343,
-  fakeAgentsCount: 12
+  fakeAgentsCount: 12,
+  totalMonthlyRent: 4612400,
+  listingsLast7Days: 129
 };
 
 export const CORRUPT_LISTING_IDS = new Set<string>(["100-6000323", "100-6000338", "100-6001461", "100-6001968", "100-6002071", "DWE-6000010", "DWE-6001015", "DWE-6002663", "DWE-6002846", "MAG-6000453", "MAG-6000527", "MAG-6000631", "MAG-6001135", "MAG-6002834", "SQU-6001477", "SQU-6003044", "ZER-6000468", "ZER-6000669"]);
