@@ -7,20 +7,24 @@ This repository contains the submission for the Ivy Homes Software Engineering I
 ```
 ├── submission.json          # Complete JSON document containing answers and all 21 API discrepancies
 ├── README.md                # Project documentation, execution instructions, and reflection
-├── data/                    # Full paged live datasets (3,500 listings, 1,320 rentals, 400 projects)
-│   ├── listings.json
-│   ├── rentals.json
-│   └── projects.json
-├── ivy-frontend/            # Complete React + Vite + TypeScript web application
-│   ├── src/
-│   │   ├── api.ts           # Resilient API layer handling auth, auto-refresh & query handling
-│   │   ├── pages/           # Dashboard, Listings, ListingDetail, Rentals, Projects, Favorites, Login
-│   │   ├── components/      # Navbar, PrivateRoute, and layout components
-│   │   └── index.css        # Custom CSS design system with Dark/Light mode
-│   ├── package.json
-│   └── .env.example
-├── API_REFERENCE.md         # Original (flawed) documentation provided with assignment
-└── statement.md             # Assignment prompt and technical specification
+├── vercel.json              # Vercel SPA client-side routing configuration
+├── data/                    # Full datasets and assignment reference documentation
+│   ├── listings.json        # 3,500 raw sale listings
+│   ├── rentals.json         # 1,320 rental properties
+│   ├── projects.json        # 400 development projects
+│   ├── API_REFERENCE.md     # Original (flawed) documentation provided with assignment
+│   └── statement.md         # Assignment prompt and technical specification
+└── ivy-frontend/            # Complete React + Vite + TypeScript web application
+    ├── src/
+    │   ├── api.ts           # Resilient API layer handling auth, auto-refresh & query handling
+    │   ├── auditData.ts     # Verified discrepancy constants, corrupt IDs & fake listing sets
+    │   ├── pages/           # Dashboard, Listings, ListingDetail, Rentals, Projects, Favorites, Login
+    │   ├── components/      # Navbar, PrivateRoute, and layout components
+    │   ├── assets/          # Theme-aware brand SVG logos (light & dark mode)
+    │   └── index.css        # Custom CSS design system with Dark/Light mode
+    ├── package.json
+    ├── vercel.json
+    └── .env.example
 ```
 
 ---
