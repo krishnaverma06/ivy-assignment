@@ -88,3 +88,25 @@ export const buildQuery = (params: Record<string, any>) => {
   });
   return query.toString();
 };
+
+export const getSavedListings = async () => {
+  return apiFetch('/v1/saved');
+};
+
+export const saveListing = async (listingId: string) => {
+  return apiFetch('/v1/saved', {
+    method: 'POST',
+    body: JSON.stringify({ listing_id: listingId })
+  });
+};
+
+export const removeSavedListing = async (listingId: string) => {
+  return apiFetch(`/v1/saved/${listingId}`, {
+    method: 'DELETE'
+  });
+};
+
+export const getMe = async () => {
+  return apiFetch('/v1/me');
+};
+

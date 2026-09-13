@@ -599,10 +599,10 @@
     {
       "endpoint": "/v1/favourites",
       "category": "missing_endpoint",
-      "documented": "GET /v1/favourites, POST /v1/favourites, DELETE /v1/favourites/{id} - Allows logged-in user to save listings.",
-      "actual": "All favourite endpoints return 404 Not Found.",
-      "how_found": "Attempted GET, POST, and DELETE on /v1/favourites with valid bearer token.",
-      "impact": "Saved listings feature must be implemented entirely client-side using localStorage.",
+      "documented": "GET /v1/favourites, POST /v1/favourites (body: {'id': '...'}), DELETE /v1/favourites/{id} - Allows logged-in user to save listings.",
+      "actual": "All /v1/favourites paths return 404 Not Found. The functionality is instead implemented at /v1/saved (GET /v1/saved, POST /v1/saved requiring {'listing_id': '...'}, and DELETE /v1/saved/{id}).",
+      "how_found": "Called GET/POST/DELETE on /v1/favourites resulting in 404; probed common REST resource aliases and confirmed /v1/saved handles saved listings with 200/201 responses.",
+      "impact": "Clients following the documented /v1/favourites paths fail with 404; applications must use /v1/saved and supply 'listing_id' key instead of 'id'.",
       "evidence": []
     },
     {
@@ -612,6 +612,42 @@
       "actual": "Returns 404 Not Found.",
       "how_found": "Called GET /v1/analytics/summary with valid bearer token.",
       "impact": "Dashboard and insights metrics must be aggregated and computed client-side from the raw collections.",
+      "evidence": []
+    },
+    {
+      "endpoint": "/v1/me",
+      "category": "undocumented_endpoint",
+      "documented": "There is no user profile or session context endpoint documented in the API reference.",
+      "actual": "GET /v1/me exists and returns the authenticated user's profile, city_id (6), city ('gurgaon'), assigned_locality ('mg road'), reference_date ('2026-09-10T00:00:00+05:30'), and scoping rules.",
+      "how_found": "Probed standard REST convention /v1/me with Bearer token and X-API-Key header; received 200 OK with full user and session context.",
+      "impact": "Enables client applications to dynamically inspect user identity, assigned locality, and city scoping instead of relying on static configuration.",
+      "evidence": []
+    },
+    {
+      "endpoint": "/v1/saved",
+      "category": "undocumented_endpoint",
+      "documented": "The endpoint /v1/saved is not documented in API_REFERENCE.md (which instead documented /v1/favourites with an 'id' payload).",
+      "actual": "GET /v1/saved, POST /v1/saved (requiring {'listing_id': '...'}), and DELETE /v1/saved/{id} exist and provide full server-side saved listings persistence.",
+      "how_found": "Tested REST resource conventions for saved listings; confirmed 200 OK on GET, 201 Created on POST with listing_id, and 200 OK on DELETE.",
+      "impact": "Frontend must send saved listing mutations to /v1/saved rather than the broken /v1/favourites path.",
+      "evidence": []
+    },
+    {
+      "endpoint": "/v1/listings",
+      "category": "filters",
+      "documented": "property_type filters include independent_house",
+      "actual": "property_type requires literal space independent house. Passing independent_house returns no results.",
+      "how_found": "Tested property_type=independent_house (0 results) vs property_type=independent house (290 results).",
+      "impact": "Frontend must send property_type with a literal space to correctly filter independent houses.",
+      "evidence": []
+    },
+    {
+      "endpoint": "/v1/projects",
+      "category": "filters",
+      "documented": "project_status",
+      "actual": "project_status filter requires literal spaces instead of underscores. Sending under_construction returns 0 results, but under construction works.",
+      "how_found": "Tested project_status=under_construction (0 results) vs project_status=under construction (131 results).",
+      "impact": "Frontend must format project_status strings with spaces before sending them as query parameters.",
       "evidence": []
     }
   ]

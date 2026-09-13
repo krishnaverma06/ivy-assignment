@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api';
+import { MapPin, Bed, Maximize } from 'lucide-react';
 
 const Rentals = () => {
   const [allRentals, setAllRentals] = useState<any[]>([]);
@@ -189,31 +190,50 @@ const Rentals = () => {
             {paginatedRentals.map(rental => (
               <div 
                 key={rental.listing_id} 
-                className="card flex-col gap-2"
-                style={{ cursor: 'pointer', transition: 'transform 0.15s ease, box-shadow 0.15s ease' }}
+                className="card card-hover flex-col"
+                style={{ cursor: 'pointer', padding: 0, overflow: 'hidden' }}
                 onClick={() => navigate(`/rentals/${rental.listing_id}`)}
               >
-                <div className="flex justify-between items-start">
-                  <span className="badge badge-green" style={{ textTransform: 'capitalize' }}>
-                    {rental.property_type || 'Apartment'}
-                  </span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
-                    {rental.furnishing || 'Unspecified'}
-                  </span>
-                </div>
-                <h3 style={{ margin: '0.5rem 0 0', fontSize: '1.25rem' }}>{rental.apartment_name || 'Unknown Building'}</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{rental.locality}</p>
-                
-                <div className="flex justify-between items-center" style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-                  <div className="flex flex-col">
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Rent/Month</span>
-                    <span style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.125rem' }}>
-                      ₹{Number(rental.price)?.toLocaleString()}
+                {/* Header visual */}
+                <div className="card-image-bg" style={{ 
+                    height: '140px', 
+                    background: 'linear-gradient(135deg, #10B981 0%, #047857 100%)',
+                    padding: '1rem'
+                  }}>
+                  <div className="flex justify-between items-start">
+                    <span className="badge" style={{ backgroundColor: 'rgba(255,255,255,0.9)', color: '#111827', textTransform: 'capitalize' }}>
+                      {rental.property_type || 'Apartment'}
+                    </span>
+                    <span className="badge" style={{ backgroundColor: 'rgba(0,0,0,0.5)', color: '#fff', textTransform: 'capitalize' }}>
+                      {rental.furnishing || 'Unspecified'}
                     </span>
                   </div>
-                  <div className="flex flex-col items-end">
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Configuration</span>
-                    <span style={{ fontWeight: 500 }}>{rental.bedroom} BHK • {rental.carpet_area} sqft</span>
+                </div>
+
+                {/* Content */}
+                <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-main)', lineHeight: 1.3 }}>
+                    {rental.apartment_name || 'Unknown Building'}
+                  </h3>
+                  <p className="flex items-center gap-1" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                    <MapPin size={14} /> {rental.locality}
+                  </p>
+                  
+                  <div className="flex justify-between items-center" style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+                    <div className="flex flex-col">
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rent/Month</span>
+                      <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '1.125rem' }}>
+                        ₹{Number(rental.price)?.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="flex items-center gap-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        <Bed size={14} /> {rental.bedroom} BHK
+                      </span>
+                      <span className="flex items-center gap-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>
+                        <Maximize size={14} /> {rental.carpet_area} sqft
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

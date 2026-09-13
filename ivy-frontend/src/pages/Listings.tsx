@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { apiFetch, userEmail } from '../api';
-import { Heart } from 'lucide-react';
+import { apiFetch, userEmail, getSavedListings, saveListing, removeSavedListing } from '../api';
+import { Heart, MapPin, Bed, Maximize } from 'lucide-react';
 import { isCorruptListing, isFakeListing, formatCarpetArea } from '../auditData';
 
 const Listings = () => {
@@ -42,6 +42,18 @@ const Listings = () => {
         const results = await Promise.all(promises);
         const data = [...results[0].results, ...results[1].results, ...results[2].results, ...results[3].results, ...results[4].results];
         setAllListings(data.filter((l: any) => l.is_live));
+
+        // Sync favorites from backend /v1/saved
+        try {
+          const savedData = await getSavedListings();
+          if (savedData && savedData.results) {
+            const serverIds = savedData.results.map((l: any) => l.listing_id);
+            setFavorites(serverIds);
+            localStorage.setItem(favKey, JSON.stringify(serverIds));
+          }
+        } catch (e) {
+          // ignore error and rely on local cache
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -49,7 +61,7 @@ const Listings = () => {
       }
     };
     fetchListings();
-  }, []);
+  }, [favKey]);
 
   const handleLoadMore = async () => {
     if (loadingMore || !hasMoreServer) return;
@@ -93,16 +105,22 @@ const Listings = () => {
     }
   };
 
-  const toggleFavorite = (e: React.MouseEvent, id: string) => {
+  const toggleFavorite = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation(); // prevent navigation
-    let newFavs = [...favorites];
-    if (newFavs.includes(id)) {
-      newFavs = newFavs.filter(f => f !== id);
-    } else {
-      newFavs.push(id);
-    }
+    const isCurrentlyFav = favorites.includes(id);
+    const newFavs = isCurrentlyFav ? favorites.filter(f => f !== id) : [...favorites, id];
     setFavorites(newFavs);
     localStorage.setItem(favKey, JSON.stringify(newFavs));
+
+    try {
+      if (isCurrentlyFav) {
+        await removeSavedListing(id);
+      } else {
+        await saveListing(id);
+      }
+    } catch (err) {
+      console.error("Failed to sync favorite on backend", err);
+    }
   };
 
   const filteredListings = useMemo(() => {
@@ -209,43 +227,70 @@ const Listings = () => {
               return (
                 <div 
                   key={listing.listing_id} 
-                  className="card flex-col gap-2" 
+                  className="card card-hover flex-col" 
                   style={{ 
                     cursor: 'pointer',
+                    padding: 0,
+                    overflow: 'hidden',
                     borderColor: corrupt ? '#FCA5A5' : fake ? '#FCD34D' : 'var(--border)'
                   }}
                   onClick={() => navigate(`/listings/${listing.listing_id}`)}
                 >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2" style={{ flexWrap: 'wrap' }}>
-                      <span className="badge badge-blue">{listing.property_type || 'Apartment'}</span>
-                      {corrupt && (
-                        <span className="badge" style={{ backgroundColor: '#FEE2E2', color: '#991B1B' }}>Corrupt</span>
-                      )}
-                      {fake && (
-                        <span className="badge" style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>Fake</span>
-                      )}
-                      {carpetInfo.isSqm && (
-                        <span className="badge" style={{ backgroundColor: '#E0E7FF', color: '#4338CA' }}>sqm</span>
-                      )}
+                  {/* Header visual */}
+                  <div className="card-image-bg" style={{ 
+                      height: '140px', 
+                      background: 'linear-gradient(135deg, #4F46E5 0%, #312E81 100%)',
+                      padding: '1rem'
+                    }}>
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-2" style={{ flexWrap: 'wrap' }}>
+                        <span className="badge" style={{ backgroundColor: 'rgba(255,255,255,0.9)', color: '#111827' }}>
+                          {listing.property_type || 'Apartment'}
+                        </span>
+                        {corrupt && (
+                          <span className="badge" style={{ backgroundColor: '#FEE2E2', color: '#991B1B' }}>Corrupt</span>
+                        )}
+                        {fake && (
+                          <span className="badge" style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>Fake</span>
+                        )}
+                        {carpetInfo.isSqm && (
+                          <span className="badge" style={{ backgroundColor: '#E0E7FF', color: '#4338CA' }}>sqm</span>
+                        )}
+                      </div>
+                      <button 
+                        onClick={(e) => toggleFavorite(e, listing.listing_id)} 
+                        className="favorite-btn"
+                        style={{ background: 'rgba(255,255,255,0.9)', padding: '0.5rem', borderRadius: '50%' }}
+                      >
+                        <Heart size={18} fill={favorites.includes(listing.listing_id) ? '#EF4444' : 'none'} color={favorites.includes(listing.listing_id) ? '#EF4444' : '#6B7280'} />
+                      </button>
                     </div>
-                    <button onClick={(e) => toggleFavorite(e, listing.listing_id)} style={{ color: favorites.includes(listing.listing_id) ? '#EF4444' : 'var(--text-muted)' }}>
-                      <Heart size={20} fill={favorites.includes(listing.listing_id) ? '#EF4444' : 'none'} />
-                    </button>
                   </div>
-                  <h3 style={{ margin: '0.5rem 0 0', fontSize: '1.25rem' }}>{listing.apartment_name || 'Unknown Building'}</h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{listing.locality}</p>
-                  
-                  <div className="flex justify-between items-center" style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-                    <div className="flex flex-col">
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Price</span>
-                      <span style={{ fontWeight: 600, color: corrupt && Number(listing.price) < 0 ? '#DC2626' : 'inherit' }}>
-                        ₹{Number(listing.price)?.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Details</span>
-                      <span style={{ fontWeight: 500 }}>{listing.bedroom}BHK • {carpetInfo.display}</span>
+
+                  {/* Content */}
+                  <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-main)', lineHeight: 1.3 }}>
+                      {listing.apartment_name || 'Unknown Building'}
+                    </h3>
+                    <p className="flex items-center gap-1" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                      <MapPin size={14} /> {listing.locality}
+                    </p>
+                    
+                    <div className="flex justify-between items-center" style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+                      <div className="flex flex-col">
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Price</span>
+                        <span style={{ fontWeight: 700, color: corrupt && Number(listing.price) < 0 ? '#DC2626' : 'var(--text-main)', fontSize: '1.125rem' }}>
+                          ₹{Number(listing.price)?.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="flex items-center gap-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          <Bed size={14} /> {listing.bedroom} BHK
+                        </span>
+                        <span className="flex items-center gap-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>
+                          <Maximize size={14} /> {carpetInfo.display}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

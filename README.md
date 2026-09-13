@@ -5,7 +5,7 @@ This repository contains the submission for the Ivy Homes Software Engineering I
 ## Repository Structure
 
 ```
-├── submission.json          # Complete JSON document containing answers and all 21 API discrepancies
+├── submission.json          # Complete JSON document containing answers and all 23 API discrepancies
 ├── README.md                # Project documentation, execution instructions, and reflection
 ├── vercel.json              # Vercel SPA client-side routing configuration
 ├── data/                    # Full datasets and assignment reference documentation
@@ -77,10 +77,10 @@ I followed the assignment guidance: *Pull the whole dataset down early, and stop
 - **The Reality**: Endpoints quietly ignore `page` and require `offset`. The `limit` is hard-capped on the server at `50`. Crucially, `total` reported `3343` for listings and `1300` for rentals, but looping until `has_more: false` actually yielded **3,500 listings** and **1,320 rentals**. Stopping at `total / limit` would have caused a silent data loss of 150 listings and 20 rentals.
 - **The Fix**: I wrote pagination logic that strictly operates on `offset` increments of 50 and terminates only when `has_more === false`.
 
-### 3. The Broken / Missing Endpoints
+### 3. The Broken / Missing Endpoints & REST Aliases
 - **The Claim**: Documentation documented `/v1/analytics/summary`, `/v1/favourites`, and singular `/v1/listing/{id}`.
-- **The Reality**: All returned `404 Not Found`. Singular `/v1/listing/{id}` was actually served at plural `/v1/listings/{id}`.
-- **The Fix**: Built a client-side analytics aggregation engine in `Dashboard.tsx`, mapped single listing fetches to `/v1/listings/:id`, and built a local per-user favorites system stored in `localStorage` keyed by user email (`favorites_${userEmail}`).
+- **The Reality**: `/v1/analytics/summary` returned `404 Not Found`. Singular `/v1/listing/{id}` was actually served at plural `/v1/listings/{id}`. Similarly, `/v1/favourites` returned `404`, but probing standard REST conventions uncovered the real working backend endpoint at `/v1/saved` (accepting `POST /v1/saved` with `listing_id`, `GET /v1/saved`, and `DELETE /v1/saved/{id}`). Furthermore, we discovered the undocumented `GET /v1/me` endpoint which programmatically provides user profile data, assigned locality, and reference date.
+- **The Fix**: Built a client-side analytics aggregation engine in `Dashboard.tsx`, mapped single listing fetches to `/v1/listings/:id`, connected the frontend favorites system directly to the `/v1/saved` backend CRUD endpoint with optimistic `localStorage` syncing, and used `/v1/me` for profile verification.
 
 ### 4. Unit Anomalies (Crores vs. Rupees, Sqm vs. Sqft)
 - **The Claim**: All monetary amounts are integer Rupees; all areas are integer Square Feet.
@@ -108,6 +108,10 @@ Hypotheses that did not pan out are just as informative as those that did:
 4. **Listing descriptions and URLs**:
    - *Hypothesis*: I suspected fake agents posting duplicate listings might reuse the same `listing_url` across different websites.
    - *Result*: Every listing URL pointed to distinct real-world portal formats (`100acres.com`, `dwelling.com`, `squarelane.com`, etc.). Fake listings were instead detectable via phone numbers posting under multiple conflicting agent and agency identities.
+
+5. **Alternative Query Parameter Names for Filters**:
+   - *Hypothesis*: Because the API ignored the documented `min_price`, `max_price`, and `furnishing` filters on `/v1/listings`, I hypothesized the documentation simply used the wrong parameter names (e.g., `price_min` instead of `min_price`, or `furnished` instead of `furnishing`), just as it used `page` instead of `offset`.
+   - *Result*: I wrote a script to exhaustively test 24 naming variations for price (including bounds in Crores/Lakhs) and 21 variations for furnishing. None of them had any effect. The backend simply does not support these filters on the listings endpoint. I did, however, prove that `property_type` requires a literal space (`independent house`) rather than the documented underscore (`independent_house`).
 
 ---
 

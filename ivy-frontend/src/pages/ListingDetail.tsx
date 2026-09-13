@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { apiFetch, userEmail } from '../api';
+import { apiFetch, userEmail, getSavedListings, saveListing, removeSavedListing } from '../api';
 import { Heart, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { isCorruptListing, isFakeListing, formatCarpetArea } from '../auditData';
 
@@ -18,11 +18,22 @@ const ListingDetail = () => {
   const isCorrupt = isCorruptListing(id);
   const isFake = isFakeListing(id);
 
-  const toggleFavorite = () => {
+  const toggleFavorite = async () => {
     if (!id) return;
-    const newFavs = isFavorite ? favorites.filter(f => f !== id) : [...favorites, id];
+    const isCurrentlyFav = favorites.includes(id);
+    const newFavs = isCurrentlyFav ? favorites.filter(f => f !== id) : [...favorites, id];
     setFavorites(newFavs);
     localStorage.setItem(favKey, JSON.stringify(newFavs));
+
+    try {
+      if (isCurrentlyFav) {
+        await removeSavedListing(id);
+      } else {
+        await saveListing(id);
+      }
+    } catch (err) {
+      console.error('Failed to sync favorite on backend', err);
+    }
   };
 
   useEffect(() => {
@@ -30,6 +41,18 @@ const ListingDetail = () => {
       try {
         const data = await apiFetch(`/v1/listings/${id}`);
         setListing(data);
+
+        // Sync favorites from backend
+        try {
+          const savedData = await getSavedListings();
+          if (savedData && savedData.results) {
+            const serverIds = savedData.results.map((l: any) => l.listing_id);
+            setFavorites(serverIds);
+            localStorage.setItem(favKey, JSON.stringify(serverIds));
+          }
+        } catch (e) {
+          // ignore error
+        }
       } catch (err: any) {
         setError(err.message || 'Failed to load listing');
       } finally {
@@ -37,7 +60,7 @@ const ListingDetail = () => {
       }
     };
     fetchListing();
-  }, [id]);
+  }, [id, favKey]);
 
   if (loading) return <div className="container" style={{ padding: '3rem 0', textAlign: 'center' }}>Loading details...</div>;
   if (error) return <div className="container" style={{ padding: '3rem 0', textAlign: 'center', color: '#EF4444' }}>{error}</div>;
