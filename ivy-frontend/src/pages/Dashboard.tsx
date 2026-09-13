@@ -154,7 +154,7 @@ const Dashboard = () => {
               <div className="card" style={{ backgroundColor: '#FEF2F2', borderColor: '#FCA5A5' }}>
                 <div className="flex items-center gap-3" style={{ marginBottom: '0.5rem' }}>
                   <ShieldAlert size={24} color="#EF4444" />
-                  <h3 style={{ color: '#991B1B', margin: 0 }}>Fraud Discovered (Q9)</h3>
+                  <h3 style={{ color: '#991B1B', margin: 0 }}>Fraud Discovered</h3>
                 </div>
                 <p style={{ color: '#7F1D1D', fontSize: '0.95rem', margin: 0 }}>
                   We discovered <strong>12 fake agent accounts</strong> operating under multiple names, allowing us to successfully isolate <strong>{AUDIT_METRICS.fakeCount} fake listings</strong> that were generated solely to drive artificial inquiries.
@@ -164,7 +164,7 @@ const Dashboard = () => {
               <div className="card" style={{ backgroundColor: '#FFFBEB', borderColor: '#FCD34D' }}>
                 <div className="flex items-center gap-3" style={{ marginBottom: '0.5rem' }}>
                   <FileX size={24} color="#F59E0B" />
-                  <h3 style={{ color: '#92400E', margin: 0 }}>Corrupt Data Identified (Q4 & Q10)</h3>
+                  <h3 style={{ color: '#92400E', margin: 0 }}>Corrupt Data Identified</h3>
                 </div>
                 <p style={{ color: '#78350F', fontSize: '0.95rem', margin: 0 }}>
                   Our audit flagged <strong>{AUDIT_METRICS.corruptCount} corrupt listings</strong> with impossible data (e.g., negative prices, or carpet area exceeding super built-up area). Furthermore, <strong>{AUDIT_METRICS.projectMismatches} projects</strong> report inaccurate listing counts.

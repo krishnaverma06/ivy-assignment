@@ -8,6 +8,9 @@ const Listings = () => {
   const [allListings, setAllListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [offset, setOffset] = useState(250);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMoreServer, setHasMoreServer] = useState(true);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,7 +30,7 @@ const Listings = () => {
     const fetchListings = async () => {
       setLoading(true);
       try {
-        // Fetch a large pool for client-side filtering
+        // Fetch initial pool of 250 records
         const limit = 50;
         const promises = [
           apiFetch(`/v1/listings?offset=0&limit=${limit}`),
@@ -47,6 +50,48 @@ const Listings = () => {
     };
     fetchListings();
   }, []);
+
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMoreServer) return;
+    setLoadingMore(true);
+    try {
+      const limit = 50;
+      const promises = [
+        apiFetch(`/v1/listings?offset=${offset}&limit=${limit}`),
+        apiFetch(`/v1/listings?offset=${offset + 50}&limit=${limit}`),
+        apiFetch(`/v1/listings?offset=${offset + 100}&limit=${limit}`),
+        apiFetch(`/v1/listings?offset=${offset + 150}&limit=${limit}`)
+      ];
+      const results = await Promise.all(promises);
+      let newItems: any[] = [];
+      let serverHasMore = true;
+
+      for (const res of results) {
+        if (res.results && res.results.length > 0) {
+          newItems.push(...res.results.filter((l: any) => l.is_live));
+        }
+        if (!res.has_more || res.results.length < limit) {
+          serverHasMore = false;
+        }
+      }
+
+      setAllListings(prev => {
+        const existingIds = new Set(prev.map(p => p.listing_id));
+        const uniqueNew = newItems.filter(item => !existingIds.has(item.listing_id));
+        return [...prev, ...uniqueNew];
+      });
+
+      const nextOffset = offset + 200;
+      setOffset(nextOffset);
+      if (!serverHasMore || nextOffset >= 3500) {
+        setHasMoreServer(false);
+      }
+    } catch (err) {
+      console.error("Failed to load more listings", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const toggleFavorite = (e: React.MouseEvent, id: string) => {
     e.stopPropagation(); // prevent navigation
@@ -140,7 +185,19 @@ const Listings = () => {
       {loading ? (
         <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)' }}>Loading listings...</div>
       ) : filteredListings.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)' }}>No listings match your filters.</div>
+        <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)' }}>
+          <p>No listings match your filters in the currently loaded batch.</p>
+          {hasMoreServer && (
+            <button 
+              className="btn btn-primary"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              style={{ marginTop: '1rem', padding: '0.5rem 1.5rem', fontWeight: 500 }}
+            >
+              {loadingMore ? 'Loading...' : 'Load More Listings'}
+            </button>
+          )}
+        </div>
       ) : (
         <>
           <div className="grid grid-cols-3 md:grid-cols-1" style={{ marginBottom: '2rem', gap: '1.25rem' }}>
@@ -163,10 +220,10 @@ const Listings = () => {
                     <div className="flex items-center gap-2" style={{ flexWrap: 'wrap' }}>
                       <span className="badge badge-blue">{listing.property_type || 'Apartment'}</span>
                       {corrupt && (
-                        <span className="badge" style={{ backgroundColor: '#FEE2E2', color: '#991B1B' }}>Corrupt (Q4)</span>
+                        <span className="badge" style={{ backgroundColor: '#FEE2E2', color: '#991B1B' }}>Corrupt</span>
                       )}
                       {fake && (
-                        <span className="badge" style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>Fake (Q9)</span>
+                        <span className="badge" style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>Fake</span>
                       )}
                       {carpetInfo.isSqm && (
                         <span className="badge" style={{ backgroundColor: '#E0E7FF', color: '#4338CA' }}>sqm</span>
@@ -195,13 +252,33 @@ const Listings = () => {
               );
             })}
           </div>
+
+          {/* Load More Button */}
+          {hasMoreServer && (
+            <div className="flex justify-center items-center" style={{ margin: '1rem 0 2.5rem' }}>
+              <button 
+                className="btn btn-secondary" 
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                style={{ 
+                  padding: '0.75rem 2rem', 
+                  fontWeight: 600, 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem' 
+                }}
+              >
+                {loadingMore ? 'Loading...' : 'Load More Listings'}
+              </button>
+            </div>
+          )}
           
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-4" style={{ paddingBottom: '3rem' }}>
               <button 
                 className="btn btn-secondary" 
                 disabled={page === 1}
-                onClick={() => setPage(p => p - 1)}
+                onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               >
                 Previous
               </button>
@@ -209,7 +286,7 @@ const Listings = () => {
               <button 
                 className="btn btn-secondary" 
                 disabled={page === totalPages}
-                onClick={() => setPage(p => p + 1)}
+                onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               >
                 Next
               </button>

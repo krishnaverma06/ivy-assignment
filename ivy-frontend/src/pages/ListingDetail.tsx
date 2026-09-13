@@ -54,7 +54,7 @@ const ListingDetail = () => {
         <div className="card" style={{ backgroundColor: '#FEF2F2', borderColor: '#FCA5A5', padding: '1rem 1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#991B1B' }}>
           <AlertTriangle size={24} color="#EF4444" style={{ flexShrink: 0 }} />
           <div>
-            <strong>Data Integrity Alert (Q4):</strong> This listing was identified as containing mathematically impossible data (e.g., negative price, floor &gt; total floors, or carpet area &gt; super built-up area).
+            <strong>Data Integrity Alert:</strong> This listing was identified as containing mathematically impossible data (e.g., negative price, floor &gt; total floors, or carpet area &gt; super built-up area).
           </div>
         </div>
       )}
@@ -63,7 +63,7 @@ const ListingDetail = () => {
         <div className="card" style={{ backgroundColor: '#FFFBEB', borderColor: '#FCD34D', padding: '1rem 1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#92400E' }}>
           <ShieldAlert size={24} color="#F59E0B" style={{ flexShrink: 0 }} />
           <div>
-            <strong>Syndicate / Fraud Alert (Q9):</strong> The seller contact ({listing.posted_by_contact}) was identified posting under multiple conflicting agent/agency names to generate fake inquiries.
+            <strong>Syndicate / Fraud Alert:</strong> The seller contact ({listing.posted_by_contact}) was identified posting under multiple conflicting agent/agency names to generate fake inquiries.
           </div>
         </div>
       )}
