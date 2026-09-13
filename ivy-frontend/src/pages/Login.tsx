@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE, API_KEY, setTokens } from '../api';
-import { Home } from 'lucide-react';
+import logoLight from '../assets/ivy_light.svg';
 
 const Login = () => {
   const [email, setEmail] = useState('demo1@ivy.homes');
-  const [password, setPassword] = useState('12b9d8eb7b');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -43,8 +43,8 @@ const Login = () => {
     <div className="flex items-center justify-center" style={{ minHeight: '100vh', backgroundColor: 'var(--background)' }}>
       <div className="card" style={{ width: '100%', maxWidth: '400px', padding: '2.5rem' }}>
         <div className="flex-col items-center gap-4" style={{ marginBottom: '2rem', textAlign: 'center' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'white', marginBottom: '1rem' }}>
-            <Home size={28} />
+          <div style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'center' }}>
+            <img src={logoLight} alt="Ivy Homes" style={{ height: '34px', width: 'auto', display: 'block' }} />
           </div>
           <h2>Welcome Back</h2>
           <p style={{ color: 'var(--text-muted)' }}>Sign in to access real estate data.</p>

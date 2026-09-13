@@ -1,5 +1,5 @@
 export const API_BASE = 'https://solve.ivy.homes';
-export const API_KEY = import.meta.env.VITE_API_KEY || 'IVY26-C01834DF7787'; // Fallback for local testing if env is missing
+export const API_KEY = import.meta.env.VITE_API_KEY || '';
 
 let accessToken = localStorage.getItem('access_token');
 let refreshToken = localStorage.getItem('refresh_token');

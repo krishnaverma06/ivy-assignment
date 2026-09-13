@@ -2,6 +2,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, LayoutDashboard, Building, Heart, LogOut, Sun, Moon } from 'lucide-react';
 import { clearTokens } from '../api';
 import { useState, useEffect } from 'react';
+import logoLight from '../assets/ivy_light.svg';
+import logoDark from '../assets/ivy_dark.svg';
 
 const Navbar = () => {
   const location = useLocation();
@@ -35,11 +37,12 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="container flex justify-between items-center md:flex-col md:items-start md:gap-4">
-        <Link to="/dashboard" className="flex items-center gap-2" style={{ color: 'var(--primary)', fontWeight: 700, fontSize: '1.25rem' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-            <Home size={20} />
-          </div>
-          Ivy Homes
+        <Link to="/dashboard" className="flex items-center" style={{ textDecoration: 'none', padding: '0.25rem 0' }}>
+          <img 
+            src={theme === 'dark' ? logoDark : logoLight} 
+            alt="Ivy Homes" 
+            style={{ height: '26px', width: 'auto', display: 'block' }} 
+          />
         </Link>
         <div className="flex items-center gap-6" style={{ flexWrap: 'wrap' }}>
           {navItems.map((item) => {

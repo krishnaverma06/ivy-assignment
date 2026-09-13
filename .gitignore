@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+ivy-frontend/node_modules/
+
+# Production builds
+dist/
+ivy-frontend/dist/
+
+# Environment and secrets
+.env
+ivy-frontend/.env
+*.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Live extractions
+live_*.json
+
+# Local notes and documentation
+explanation.md
