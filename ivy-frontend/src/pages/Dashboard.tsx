@@ -1,71 +1,7 @@
-import { useEffect, useState } from 'react';
-import { apiFetch } from '../api';
 import { TrendingUp, ShieldAlert, FileX } from 'lucide-react';
 import { AUDIT_METRICS, FINDINGS } from '../auditData';
 
 const Dashboard = () => {
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        // Since /v1/analytics/summary is 404, we manually fetch a large sample to compute insights
-        const limit = 50;
-        const promises = [
-          apiFetch(`/v1/listings?offset=0&limit=${limit}`),
-          apiFetch(`/v1/listings?offset=50&limit=${limit}`),
-          apiFetch(`/v1/listings?offset=100&limit=${limit}`),
-          apiFetch(`/v1/listings?offset=150&limit=${limit}`)
-        ];
-
-        const results = await Promise.all(promises);
-        const allListings = [...results[0].results, ...results[1].results, ...results[2].results, ...results[3].results].filter(l => l.is_live);
-
-        // Compute Median Price from sample
-        const prices = allListings.map(l => Number(l.price)).filter(p => p > 0 && !isNaN(p)).sort((a, b) => a - b);
-        const medianPrice = prices.length > 0 ? prices[Math.floor(prices.length / 2)] : 0;
-
-        // Compute Median Price Per Sqft from sample
-        const pricesPerSqft = allListings
-          .filter(l => Number(l.price) > 0 && Number(l.carpet_area) > 0)
-          .map(l => Number(l.price) / Number(l.carpet_area))
-          .filter(p => !isNaN(p))
-          .sort((a, b) => a - b);
-        const medianPricePerSqft = pricesPerSqft.length > 0 ? pricesPerSqft[Math.floor(pricesPerSqft.length / 2)] : 0;
-
-        // Compute By Locality
-        const localityMap: Record<string, { total: number, count: number }> = {};
-        allListings.forEach(l => {
-          const p = Number(l.price);
-          if (!l.locality || isNaN(p) || p <= 0) return;
-          if (!localityMap[l.locality]) localityMap[l.locality] = { total: 0, count: 0 };
-          localityMap[l.locality].total += p;
-          localityMap[l.locality].count += 1;
-        });
-
-        const byLocality = Object.entries(localityMap)
-          .map(([name, data]) => ({
-            name,
-            avg_price: Math.round(data.total / data.count)
-          }))
-          .sort((a, b) => b.avg_price - a.avg_price)
-          .slice(0, 5); // Top 5
-
-        setStats({
-          medianPrice,
-          medianPricePerSqft,
-          byLocality
-        });
-      } catch (err) {
-        console.error("Failed to fetch stats", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-  }, []);
-
   return (
     <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1rem' }}>
       {/* Header Section */}
@@ -80,12 +16,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
-          Aggregating data...
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
           
           {/* Key Market Metrics */}
           <section>
@@ -263,8 +194,7 @@ const Dashboard = () => {
             </div>
           </section>
 
-        </div>
-      )}
+      </div>
     </div>
   );
 };
