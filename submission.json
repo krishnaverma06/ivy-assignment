@@ -8,7 +8,7 @@
   },
   "answers": {
     "total_listing_records": 3500,
-    "unique_properties": 3485,
+    "unique_properties": 3488,
     "active_listings": 2792,
     "corrupt_listing_ids": [
       "100-6000323",
@@ -31,7 +31,7 @@
       "ZER-6000669"
     ],
     "total_monthly_rent": 4612400,
-    "avg_price_per_sqft_2bhk": 27457.66,
+    "avg_price_per_sqft_2bhk": 12897.83,
     "costliest_project": {
       "project_id": "P60090",
       "price_max_inr": 989000000

@@ -21,6 +21,13 @@ const Rentals = () => {
     const loadRentals = async () => {
       setLoading(true);
       try {
+        const cached = localStorage.getItem('cached_rentals');
+        if (cached) {
+          setAllRentals(JSON.parse(cached));
+          setLoading(false);
+          return;
+        }
+
         const limit = 50;
         // 1. Initial fast batch (first 300 records)
         const initialPromises = [
@@ -79,6 +86,10 @@ const Rentals = () => {
           offset += 200;
           if (offset > 2000) break; // Guard against infinite loop
         }
+        
+        if (isMounted && !hasMore) {
+          localStorage.setItem('cached_rentals', JSON.stringify(accumulated));
+        }
       } catch (err) {
         console.error("Rentals fetch error:", err);
         if (isMounted) setLoading(false);
@@ -117,6 +128,9 @@ const Rentals = () => {
     <div className="container">
       <div className="flex justify-between items-center" style={{ marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h2 style={{ margin: 0 }}>Rental Properties</h2>
+        <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+          Rentals: {filteredRentals.length} / {allRentals.length}
+        </span>
       </div>
 
       {/* Filters Bar */}

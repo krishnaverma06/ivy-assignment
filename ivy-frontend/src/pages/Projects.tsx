@@ -19,6 +19,13 @@ const Projects = () => {
     const fetchProjects = async () => {
       setLoading(true);
       try {
+        const cached = localStorage.getItem('cached_projects');
+        if (cached) {
+          setAllProjects(JSON.parse(cached));
+          setLoading(false);
+          return;
+        }
+
         const limit = 50;
         const promises = [
           apiFetch(`/v1/projects?offset=0&limit=${limit}`),
@@ -33,6 +40,7 @@ const Projects = () => {
         const results = await Promise.all(promises);
         const data = results.flatMap((r: any) => r.results || []);
         setAllProjects(data);
+        localStorage.setItem('cached_projects', JSON.stringify(data));
       } catch (err) {
         console.error(err);
       } finally {
@@ -76,7 +84,7 @@ const Projects = () => {
       <div className="flex justify-between items-center" style={{ marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h2 style={{ margin: 0 }}>Project Developments</h2>
         <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-          {filteredProjects.length} projects found
+          Projects: {filteredProjects.length} / {allProjects.length}
         </span>
       </div>
 

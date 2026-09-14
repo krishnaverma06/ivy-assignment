@@ -8,9 +8,6 @@ const Listings = () => {
   const [allListings, setAllListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [offset, setOffset] = useState(250);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMoreServer, setHasMoreServer] = useState(true);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,26 +24,53 @@ const Listings = () => {
   const [favorites, setFavorites] = useState<string[]>(JSON.parse(localStorage.getItem(favKey) || '[]'));
 
   useEffect(() => {
-    const fetchListings = async () => {
+    let isMounted = true;
+
+    const loadListings = async () => {
       setLoading(true);
       try {
-        // Fetch initial pool of 250 records
+        const cached = localStorage.getItem('cached_listings');
+        if (cached) {
+          setAllListings(JSON.parse(cached));
+          setLoading(false);
+          // Still need to sync favorites quietly in background
+          try {
+            const savedData = await getSavedListings();
+            if (savedData && savedData.results && isMounted) {
+              const serverIds = savedData.results.map((l: any) => l.listing_id);
+              setFavorites(serverIds);
+              localStorage.setItem(favKey, JSON.stringify(serverIds));
+            }
+          } catch (e) {
+            // ignore error
+          }
+          return;
+        }
+
         const limit = 50;
-        const promises = [
+        // 1. Initial fast batch (first 300 records)
+        const initialPromises = [
           apiFetch(`/v1/listings?offset=0&limit=${limit}`),
           apiFetch(`/v1/listings?offset=50&limit=${limit}`),
           apiFetch(`/v1/listings?offset=100&limit=${limit}`),
           apiFetch(`/v1/listings?offset=150&limit=${limit}`),
-          apiFetch(`/v1/listings?offset=200&limit=${limit}`)
+          apiFetch(`/v1/listings?offset=200&limit=${limit}`),
+          apiFetch(`/v1/listings?offset=250&limit=${limit}`)
         ];
-        const results = await Promise.all(promises);
-        const data = [...results[0].results, ...results[1].results, ...results[2].results, ...results[3].results, ...results[4].results];
-        setAllListings(data.filter((l: any) => l.is_live));
+        const initialResults = await Promise.all(initialPromises);
+        let accumulated = initialResults
+          .flatMap((r: any) => r.results || [])
+          .filter((l: any) => l.is_live);
 
-        // Sync favorites from backend /v1/saved
+        if (isMounted) {
+          setAllListings(accumulated);
+          setLoading(false);
+        }
+
+        // Sync favorites in the background
         try {
           const savedData = await getSavedListings();
-          if (savedData && savedData.results) {
+          if (savedData && savedData.results && isMounted) {
             const serverIds = savedData.results.map((l: any) => l.listing_id);
             setFavorites(serverIds);
             localStorage.setItem(favKey, JSON.stringify(serverIds));
@@ -54,56 +78,58 @@ const Listings = () => {
         } catch (e) {
           // ignore error and rely on local cache
         }
+
+        // 2. Background progressive fetch for remaining records until exhausted
+        let offset = 300;
+        let hasMore = true;
+
+        while (hasMore && isMounted) {
+          const batchPromises = [
+            apiFetch(`/v1/listings?offset=${offset}&limit=${limit}`),
+            apiFetch(`/v1/listings?offset=${offset + 50}&limit=${limit}`),
+            apiFetch(`/v1/listings?offset=${offset + 100}&limit=${limit}`),
+            apiFetch(`/v1/listings?offset=${offset + 150}&limit=${limit}`)
+          ];
+          const batchResults = await Promise.all(batchPromises);
+
+          let newItems: any[] = [];
+          for (const res of batchResults) {
+            if (res.results && res.results.length > 0) {
+              newItems.push(...res.results.filter((l: any) => l.is_live));
+            }
+            if (!res.has_more || res.results.length < limit) {
+              hasMore = false;
+              break;
+            }
+          }
+
+          if (!isMounted) break;
+
+          if (newItems.length > 0) {
+            const existingIds = new Set(accumulated.map(a => a.listing_id));
+            const uniqueNew = newItems.filter(item => !existingIds.has(item.listing_id));
+            if (uniqueNew.length > 0) {
+              accumulated = [...accumulated, ...uniqueNew];
+              setAllListings(accumulated);
+            }
+          }
+
+          offset += 200;
+          if (offset > 4000) break; // Guard against infinite loop (total is ~3500)
+        }
+        
+        if (isMounted && !hasMore) {
+          localStorage.setItem('cached_listings', JSON.stringify(accumulated));
+        }
       } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+        console.error("Listings fetch error:", err);
+        if (isMounted) setLoading(false);
       }
     };
-    fetchListings();
+
+    loadListings();
+    return () => { isMounted = false; };
   }, [favKey]);
-
-  const handleLoadMore = async () => {
-    if (loadingMore || !hasMoreServer) return;
-    setLoadingMore(true);
-    try {
-      const limit = 50;
-      const promises = [
-        apiFetch(`/v1/listings?offset=${offset}&limit=${limit}`),
-        apiFetch(`/v1/listings?offset=${offset + 50}&limit=${limit}`),
-        apiFetch(`/v1/listings?offset=${offset + 100}&limit=${limit}`),
-        apiFetch(`/v1/listings?offset=${offset + 150}&limit=${limit}`)
-      ];
-      const results = await Promise.all(promises);
-      let newItems: any[] = [];
-      let serverHasMore = true;
-
-      for (const res of results) {
-        if (res.results && res.results.length > 0) {
-          newItems.push(...res.results.filter((l: any) => l.is_live));
-        }
-        if (!res.has_more || res.results.length < limit) {
-          serverHasMore = false;
-        }
-      }
-
-      setAllListings(prev => {
-        const existingIds = new Set(prev.map(p => p.listing_id));
-        const uniqueNew = newItems.filter(item => !existingIds.has(item.listing_id));
-        return [...prev, ...uniqueNew];
-      });
-
-      const nextOffset = offset + 200;
-      setOffset(nextOffset);
-      if (!serverHasMore || nextOffset >= 3500) {
-        setHasMoreServer(false);
-      }
-    } catch (err) {
-      console.error("Failed to load more listings", err);
-    } finally {
-      setLoadingMore(false);
-    }
-  };
 
   const toggleFavorite = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation(); // prevent navigation
@@ -148,14 +174,19 @@ const Listings = () => {
     <div className="container">
       <div className="flex justify-between items-center" style={{ marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h2 style={{ margin: 0 }}>Property Listings</h2>
-        <label className="flex items-center gap-2" style={{ cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500, backgroundColor: 'var(--card-bg)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-          <input
-            type="checkbox"
-            checked={filterFlagged}
-            onChange={e => { setFilterFlagged(e.target.checked); setPage(1); }}
-          />
-          <span>Filter Corrupt &amp; Fake Listings</span>
-        </label>
+        <div className="flex items-center gap-4">
+          <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+            Listings: {filteredListings.length} / {allListings.length}
+          </span>
+          <label className="flex items-center gap-2" style={{ cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500, backgroundColor: 'var(--card-bg)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+            <input
+              type="checkbox"
+              checked={filterFlagged}
+              onChange={e => { setFilterFlagged(e.target.checked); setPage(1); }}
+            />
+            <span>Filter Corrupt &amp; Fake Listings</span>
+          </label>
+        </div>
       </div>
 
       {/* Filters */}
@@ -204,17 +235,7 @@ const Listings = () => {
         <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)' }}>Loading listings...</div>
       ) : filteredListings.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)' }}>
-          <p>No listings match your filters in the currently loaded batch.</p>
-          {hasMoreServer && (
-            <button
-              className="btn btn-primary"
-              onClick={handleLoadMore}
-              disabled={loadingMore}
-              style={{ marginTop: '1rem', padding: '0.5rem 1.5rem', fontWeight: 500 }}
-            >
-              {loadingMore ? 'Loading...' : 'Load More Listings'}
-            </button>
-          )}
+          <p>No listings match your filters.</p>
         </div>
       ) : (
         <>
@@ -293,25 +314,6 @@ const Listings = () => {
             })}
           </div>
 
-          {/* Load More Button */}
-          {hasMoreServer && (
-            <div className="flex justify-center items-center" style={{ margin: '1rem 0 2.5rem' }}>
-              <button
-                className="btn btn-secondary"
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                style={{
-                  padding: '0.75rem 2rem',
-                  fontWeight: 600,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}
-              >
-                {loadingMore ? 'Loading...' : 'Load More Listings'}
-              </button>
-            </div>
-          )}
 
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-4" style={{ paddingBottom: '3rem' }}>
